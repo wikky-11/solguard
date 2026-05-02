@@ -38,7 +38,7 @@ export function SiteHeader() {
           Start Free Scan
         </LinkButton>
       </div>
-      <nav className="flex gap-1 overflow-x-auto border-t border-white/10 px-4 py-2 md:hidden">
+      <nav className="flex flex-wrap gap-1 border-t border-white/10 px-4 py-2 md:hidden">
         {navItems.map((item) => (
           <Link
             key={item.href}
