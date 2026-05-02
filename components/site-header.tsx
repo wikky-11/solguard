@@ -7,6 +7,7 @@ const navItems = [
   { href: "/create-token", label: "Create Token" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
+  { href: "/feedback", label: "Feedback" },
 ];
 
 export function SiteHeader() {
@@ -18,6 +19,9 @@ export function SiteHeader() {
             <ShieldCheck className="h-5 w-5 text-emerald-300" aria-hidden="true" />
           </span>
           <span className="text-lg font-bold tracking-tight">SolGuard</span>
+          <span className="hidden rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2 py-0.5 text-xs font-semibold text-emerald-200 sm:inline-flex">
+            Public Beta
+          </span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => (

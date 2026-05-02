@@ -8,6 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { normalizeSolanaAddress } from "@/lib/address";
+import {
+  trackScanCompleted,
+  trackScanFailed,
+  trackScanStarted,
+} from "@/lib/analytics";
 import { currency, percent, shortAddress } from "@/lib/utils";
 import type { ScanErrorResponse, ScanResult } from "@/types/scan";
 
@@ -39,9 +44,11 @@ export function ScanConsole() {
 
     if (!result.ok) {
       setError(result.error);
+      trackScanFailed({ reason: "invalid_address", source: "scanner" });
       return;
     }
 
+    trackScanStarted({ source: "scanner" });
     setLoading(true);
     setError(null);
     setReport(null);
@@ -54,12 +61,18 @@ export function ScanConsole() {
 
       if (!response.ok) {
         setError("error" in data ? data.error : "API unavailable");
+        trackScanFailed({
+          reason: "error" in data ? data.code : "api_unavailable",
+          source: "scanner",
+        });
         return;
       }
 
       setReport(data as ScanResult);
+      trackScanCompleted({ source: "scanner" });
     } catch {
       setError("Network issue. Please try again shortly.");
+      trackScanFailed({ reason: "network_issue", source: "scanner" });
     } finally {
       setLoading(false);
     }

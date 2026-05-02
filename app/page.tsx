@@ -8,6 +8,7 @@ import {
   Sparkles,
   WalletCards,
 } from "lucide-react";
+import { BetaNotice } from "@/components/beta-notice";
 import { Disclaimer } from "@/components/disclaimer";
 import { ScanMintForm } from "@/components/scan-mint-form";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +48,10 @@ export default function Home() {
     <div>
       <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-20">
         <div className="flex flex-col justify-center">
-          <Badge variant="good">Solana Token Risk Analyzer</Badge>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="good">Solana Token Risk Analyzer</Badge>
+            <Badge>Public Beta</Badge>
+          </div>
           <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-6xl">
             Scan Solana Tokens Before You Buy
           </h1>
@@ -55,11 +59,19 @@ export default function Home() {
             Check mint authority, freeze authority, top holders, liquidity, and
             rug-risk indicators in seconds.
           </p>
+          <BetaNotice className="mt-6 max-w-2xl" />
           <ScanMintForm className="mt-8 max-w-2xl" />
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <LinkButton href="/scan" size="lg">
               Start Free Scan
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </LinkButton>
+            <LinkButton
+              href="/scan/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              size="lg"
+              variant="secondary"
+            >
+              Try USDC sample report
             </LinkButton>
             <LinkButton href="/create-token" size="lg" variant="secondary">
               <WalletCards className="h-4 w-4" aria-hidden="true" />

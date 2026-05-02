@@ -63,6 +63,13 @@ export interface RiskSummary {
   badges: string[];
 }
 
+export interface DataConfidence {
+  onChainMint: boolean;
+  holders: boolean;
+  market: boolean;
+  metadata: boolean;
+}
+
 export interface ScanResult {
   mint: string;
   network: string;
@@ -71,6 +78,7 @@ export interface ScanResult {
   holders: HolderSummary;
   market: MarketSummary;
   risk: RiskSummary;
+  dataConfidence: DataConfidence;
 }
 
 export interface ScanErrorResponse {

@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 
-const routes = ["", "/scan", "/create-token", "/pricing", "/about"];
+const routes = ["", "/scan", "/create-token", "/pricing", "/about", "/feedback"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://solguard.app";
+  const baseUrl = "https://solguard-nine.vercel.app";
   const now = new Date();
 
   return routes.map((route) => ({

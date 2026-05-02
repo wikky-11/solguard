@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { normalizeSolanaAddress } from "@/lib/address";
+import { trackScanFailed, trackScanStarted } from "@/lib/analytics";
 
 interface ScanMintFormProps {
   buttonLabel?: string;
@@ -25,10 +26,12 @@ export function ScanMintForm({
 
     if (!result.ok) {
       setError(result.error);
+      trackScanFailed({ reason: "invalid_address" });
       return;
     }
 
     setError(null);
+    trackScanStarted({ source: "homepage" });
     router.push(`/scan/${encodeURIComponent(result.address)}`);
   }
 

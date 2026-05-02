@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
+import { BetaNotice } from "@/components/beta-notice";
 import { Disclaimer } from "@/components/disclaimer";
 import { ReportActions } from "@/components/report-actions";
 import { RiskMeter } from "@/components/risk-meter";
@@ -26,6 +27,14 @@ function riskBadgeVariant(scoreLabel: ScanResult["risk"]["label"]) {
   }
 
   return "danger" as const;
+}
+
+function availabilityBadge(available: boolean) {
+  return (
+    <Badge variant={available ? "good" : "neutral"}>
+      {available ? "Available" : "Unavailable"}
+    </Badge>
+  );
 }
 
 export function ReportView({ report }: { report: ScanResult }) {
@@ -72,6 +81,8 @@ export function ReportView({ report }: { report: ScanResult }) {
           <ReportActions report={report} />
         </div>
       </div>
+
+      <BetaNotice className="mb-5" />
 
       <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <Card className="p-6">
@@ -142,6 +153,28 @@ export function ReportView({ report }: { report: ScanResult }) {
           </div>
         </Card>
       </div>
+
+      <Card className="mt-5 p-6">
+        <h2 className="text-lg font-bold text-white">Data Confidence</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-white/10 bg-slate-950/55 p-4">
+            <p className="text-sm text-slate-500">On-chain mint data</p>
+            <div className="mt-3">{availabilityBadge(report.dataConfidence.onChainMint)}</div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-950/55 p-4">
+            <p className="text-sm text-slate-500">Holder data</p>
+            <div className="mt-3">{availabilityBadge(report.dataConfidence.holders)}</div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-950/55 p-4">
+            <p className="text-sm text-slate-500">Market data</p>
+            <div className="mt-3">{availabilityBadge(report.dataConfidence.market)}</div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-950/55 p-4">
+            <p className="text-sm text-slate-500">Metadata</p>
+            <div className="mt-3">{availabilityBadge(report.dataConfidence.metadata)}</div>
+          </div>
+        </div>
+      </Card>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Card className="p-6">
@@ -256,7 +289,8 @@ export function ReportView({ report }: { report: ScanResult }) {
                 Holder concentration unavailable
               </p>
               <p className="mt-1 text-sm text-amber-50/80">
-                The RPC provider did not return holder data for this token.
+                The RPC provider did not return holder concentration data for
+                this token.
               </p>
             </div>
           ) : (

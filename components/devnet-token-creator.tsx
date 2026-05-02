@@ -45,7 +45,15 @@ interface DevnetTokenCreatorProps {
   tokenCreatorNetwork: string;
 }
 
-const DEVNET_RPC_URL = "https://api.devnet.solana.com";
+const DEVNET_RPC_PATH = "/api/solana/devnet";
+
+function devnetRpcEndpoint() {
+  if (typeof window === "undefined") {
+    return DEVNET_RPC_PATH;
+  }
+
+  return `${window.location.origin}${DEVNET_RPC_PATH}`;
+}
 
 function walletProvider() {
   if (typeof window === "undefined") {
@@ -140,7 +148,7 @@ export function DevnetTokenCreator({
         ? new PublicKey(walletAddress)
         : new PublicKey((await provider.connect()).publicKey.toBase58());
       const mintKeypair = Keypair.generate();
-      const connection = new Connection(DEVNET_RPC_URL, "confirmed");
+      const connection = new Connection(devnetRpcEndpoint(), "confirmed");
       const lamports = await getMinimumBalanceForRentExemptMint(connection);
       const tokenAccount = await getAssociatedTokenAddress(
         mintKeypair.publicKey,
@@ -398,7 +406,7 @@ export function DevnetTokenCreator({
               <div>
                 <dt className="text-slate-500">RPC endpoint</dt>
                 <dd className="mt-1 break-all font-mono text-slate-200">
-                  {DEVNET_RPC_URL}
+                  Secure Devnet RPC proxy
                 </dd>
               </div>
               <div>

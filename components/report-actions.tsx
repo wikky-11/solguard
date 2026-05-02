@@ -3,6 +3,7 @@
 import { Copy, Download, Printer } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { trackReportCopied, trackReportDownloaded } from "@/lib/analytics";
 import { currency, percent } from "@/lib/utils";
 import type { ScanResult } from "@/types/scan";
 
@@ -19,6 +20,7 @@ function htmlReport(report: ScanResult) {
   const holderText = report.holders.unavailable
     ? "Holder concentration unavailable"
     : `${percent(report.holders.top1Percent)} top 1, ${percent(report.holders.top5Percent)} top 5`;
+  const available = (value: boolean) => (value ? "Available" : "Unavailable");
   const reasons = report.risk.reasons
     .map(
       (reason) =>
@@ -42,6 +44,7 @@ function htmlReport(report: ScanResult) {
 <body>
   <h1>SolGuard Token Risk Report</h1>
   <p class="muted">Not financial advice. This tool only provides risk indicators. Always do your own research.</p>
+  <p class="muted">SolGuard is in public beta. Reports may be incomplete if RPC, holder, metadata, or market data is unavailable.</p>
   <div class="panel">
     <h2>${escapeHtml(report.token.name ?? "Unknown Token")} (${escapeHtml(report.token.symbol ?? "N/A")})</h2>
     <p><strong>Mint:</strong> ${escapeHtml(report.mint)}</p>
@@ -60,6 +63,13 @@ function htmlReport(report: ScanResult) {
     <p><strong>Holder concentration:</strong> ${holderText}</p>
     <p><strong>Liquidity:</strong> ${currency(report.market.liquidityUsd)}</p>
   </div>
+  <div class="panel">
+    <h2>Data Confidence</h2>
+    <p><strong>On-chain mint data:</strong> ${available(report.dataConfidence.onChainMint)}</p>
+    <p><strong>Holder data:</strong> ${available(report.dataConfidence.holders)}</p>
+    <p><strong>Market data:</strong> ${available(report.dataConfidence.market)}</p>
+    <p><strong>Metadata:</strong> ${available(report.dataConfidence.metadata)}</p>
+  </div>
 </body>
 </html>`;
 }
@@ -69,6 +79,7 @@ export function ReportActions({ report }: { report: ScanResult }) {
 
   async function copyLink() {
     await navigator.clipboard.writeText(window.location.href);
+    trackReportCopied({ mint: report.mint });
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
@@ -81,6 +92,7 @@ export function ReportActions({ report }: { report: ScanResult }) {
     anchor.download = `solguard-${report.mint.slice(0, 8)}.html`;
     anchor.click();
     URL.revokeObjectURL(url);
+    trackReportDownloaded({ mint: report.mint });
   }
 
   function printReport() {

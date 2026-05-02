@@ -14,27 +14,33 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baseUrl = "https://solguard-nine.vercel.app";
+const description =
+  "Scan Solana tokens for mint authority, freeze authority, holder concentration, liquidity, market data, and transparent risk indicators.";
+const ogDescription =
+  "Check Solana token risk indicators before you buy. Mint authority, freeze authority, liquidity, holder data, and transparent scoring.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://solguard.app"),
+  metadataBase: new URL(baseUrl),
   title: {
     default: "SolGuard - Solana Token Risk Analyzer",
     template: "%s | SolGuard",
   },
-  description:
-    "Scan Solana tokens for mint authority, freeze authority, holder concentration, liquidity, and risk indicators.",
+  description,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "SolGuard - Solana Token Risk Analyzer",
-    description:
-      "Scan Solana tokens for mint authority, freeze authority, holder concentration, liquidity, and risk indicators.",
+    description: ogDescription,
     url: "/",
     siteName: "SolGuard",
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "SolGuard - Solana Token Risk Analyzer",
-    description:
-      "Scan Solana tokens for mint authority, freeze authority, holder concentration, liquidity, and risk indicators.",
+    description: ogDescription,
   },
 };
 

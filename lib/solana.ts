@@ -10,12 +10,12 @@ import { normalizeSolanaAddress } from "@/lib/address";
 import {
   getMainnetHeliusRpcUrl,
   getScannerConnection,
-  getScannerRpcUrl,
 } from "@/lib/connections";
 import { EMPTY_MARKET, fetchBestDexPair } from "@/lib/dexscreener";
 import { scoreTokenRisk } from "@/lib/risk";
 import { formatTokenAmount } from "@/lib/utils";
 import type {
+  DataConfidence,
   HolderAccount,
   HolderSummary,
   ScanResult,
@@ -36,20 +36,6 @@ export class ScanError extends Error {
 
 const RPC_BLOCKED_MESSAGE =
   "RPC request was blocked or rate-limited. Add HELIUS_API_KEY or SOLANA_MAINNET_RPC_URL in .env.local.";
-
-function redactRpcUrl(endpoint: string) {
-  try {
-    const url = new URL(endpoint);
-
-    if (url.searchParams.has("api-key")) {
-      url.searchParams.set("api-key", "REDACTED");
-    }
-
-    return url.toString();
-  } catch {
-    return endpoint;
-  }
-}
 
 function parsePublicKey(value: string) {
   const result = normalizeSolanaAddress(value);
@@ -113,21 +99,6 @@ function isBlockedRpcError(error: unknown) {
     lower.includes("fetch failed") ||
     lower.includes("network")
   );
-}
-
-function logNonFatalScannerError(
-  label: string,
-  endpoint: string,
-  error: unknown,
-) {
-  if (process.env.NODE_ENV !== "development") {
-    return;
-  }
-
-  console.info(`SolGuard scanner ${label} unavailable`, {
-    endpoint: redactRpcUrl(endpoint),
-    technicalError: error instanceof Error ? error.message : String(error),
-  });
 }
 
 function knownTokenFallback(mint: string): Partial<TokenSummary> {
@@ -269,6 +240,8 @@ async function getHolderSummarySafe(
   decimals: number,
   rpcUrl: string,
 ): Promise<HolderSummary> {
+  void rpcUrl;
+
   try {
     return await getHolderSummary(
       connection,
@@ -277,7 +250,6 @@ async function getHolderSummarySafe(
       decimals,
     );
   } catch (error) {
-    logNonFatalScannerError("holder lookup", rpcUrl, error);
     return unavailableHolderSummary(error);
   }
 }
@@ -317,21 +289,25 @@ async function getMintInfo(
         throw normalizeRpcError(token2022Error);
       }
 
-      console.error("SolGuard scanner getMint error", {
-        rpcUrl: redactRpcUrl(getScannerRpcUrl()),
-        tokenProgramError:
-          tokenProgramError instanceof Error
-            ? tokenProgramError.message
-            : String(tokenProgramError),
-        token2022Error:
-          token2022Error instanceof Error
-            ? token2022Error.message
-            : String(token2022Error),
-      });
+      void tokenProgramError;
+      void token2022Error;
 
       throw new ScanError("Token not found", "TOKEN_NOT_FOUND", 404);
     }
   }
+}
+
+function hasMarketData(market: ScanResult["market"]) {
+  return Boolean(
+    market.pairUrl ||
+      market.priceUsd ||
+      market.liquidityUsd !== null ||
+      market.volume24h !== null,
+  );
+}
+
+function hasMetadata(data: Partial<TokenSummary>) {
+  return Boolean(data.name || data.symbol || data.logo);
 }
 
 export async function scanToken(mint: string): Promise<ScanResult> {
@@ -373,6 +349,15 @@ export async function scanToken(mint: string): Promise<ScanResult> {
     market: market ?? EMPTY_MARKET,
     token,
   });
+  const dataConfidence: DataConfidence = {
+    onChainMint: true,
+    holders: !holders.unavailable,
+    market: hasMarketData(market),
+    metadata:
+      hasMetadata(metadata) ||
+      Boolean(market.tokenName || market.tokenSymbol || market.tokenLogo) ||
+      hasMetadata(knownToken),
+  };
 
   return {
     mint: mintPublicKey.toBase58(),
@@ -382,5 +367,6 @@ export async function scanToken(mint: string): Promise<ScanResult> {
     holders,
     market,
     risk,
+    dataConfidence,
   };
 }

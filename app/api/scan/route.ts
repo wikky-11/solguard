@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   if (retryAfter !== null) {
     return NextResponse.json(
       {
-        error: "Too many scan requests. Please wait a moment and try again.",
+        error: "Too many scans. Please try again shortly.",
         code: "RATE_LIMITED",
       },
       {
